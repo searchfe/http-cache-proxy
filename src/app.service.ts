@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { existsSync, renameSync, readdirSync } from 'fs';
+import { existsSync, renameSync, readdirSync, statSync } from 'fs';
 import { HttpSource, FileSource } from 'dmr-source';
 import { resolve } from 'path';
 import { Shunt } from './common/shunt';
 import { Connector } from './common/conecter';
+import { Response } from 'express';
 const Base64 = require('js-base64').Base64;
 const folderPath = resolve(process.cwd(), './cache/');
 
@@ -27,10 +28,12 @@ export class AppService {
     });
     return list.join('\r\n');
   }
-  getResource(url: string) {
+  getResource(url: string, res: Response) {
     const key = Base64.encode(url, true);
     const filePath = resolve(folderPath, key);
     if (existsSync(filePath)) {
+      const stat = statSync(filePath);
+      res.setHeader('Content-Length', stat.size);
       return new FileSource().createReadableStream({path: filePath});
     } else {
       // tslint:disable-next-line:no-console

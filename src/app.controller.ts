@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Request, Res } from '@nestjs/common';
+import { Controller, Get, Req, Request, Res, Header, HttpCode } from '@nestjs/common';
 import { Response } from 'express';
 import { AppService } from './app.service';
 import { of } from 'rxjs';
@@ -8,6 +8,8 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get('/')
+  @HttpCode(200)
+  @Header('Content-Type', 'text/html')
   getList(@Req() req: Request): string {
     // tslint:disable-next-line:no-console
     return this.appService.getList();
@@ -17,9 +19,9 @@ export class AppController {
   proxy(@Req() req: Request, @Res() res: Response) {
     const url = this.appService.getOriginUrl(req.url);
     if (url) {
-      this.appService.getResource(url).pipe(res);
+      this.appService.getResource(url, res).pipe(res);
     } else {
-      res.end(this.appService.getList());
+      return this.appService.getList();
     }
   }
 }
