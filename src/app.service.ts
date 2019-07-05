@@ -34,7 +34,7 @@ export class AppService {
     if (existsSync(filePath)) {
       const stat = statSync(filePath);
       res.setHeader('Content-Length', stat.size);
-      return new FileSource().createReadableStream({path: filePath});
+      return new FileSource({highWaterMark: 10 * 1024 * 1024}).createReadableStream({path: filePath});
     } else {
       // tslint:disable-next-line:no-console
       console.log('no-cache', url);
